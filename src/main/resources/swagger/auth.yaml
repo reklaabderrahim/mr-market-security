@@ -1,0 +1,210 @@
+openapi: 3.0.3
+info:
+  description: >
+    API for authentication
+    Cette API permet de :
+      - login
+      - register
+      - refreshToken
+  version: 1.0.7
+  title: Authentication API
+
+  x-logo:
+    url: /redoc/logo.png
+    backgroundColor: "#FFFFFF"
+tags:
+  - name: authentication
+    description: API for authentication
+servers:
+  - url: http://api.market.dz/auth/api/v1
+paths:
+  /auth/register:
+    post:
+      tags:
+        - apiAuth
+      operationId: register
+      summary: create user
+      description: "Create a user"
+      deprecated: false
+      requestBody:
+        content:
+          application/json;charset=utf-8:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+        required: true
+      responses:
+        "201":
+          description: Success
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: "#/components/schemas/AuthenticationResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /auth/login:
+    post:
+      tags:
+        - apiAuth
+      operationId: login
+      summary: login user
+      description: "login a user"
+      deprecated: false
+      requestBody:
+        content:
+          application/json;charset=utf-8:
+            schema:
+              $ref: "#/components/schemas/AuthenticationRequest"
+        required: true
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: "#/components/schemas/AuthenticationResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /auth/refresh:
+    post:
+      tags:
+        - apiAuth
+      operationId: refresh
+      summary: refresh token
+      description: "refresh token"
+      deprecated: false
+      security:
+        - bearerAuth: [ ]
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: "#/components/schemas/AuthenticationResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  securitySchemes:
+    bearerAuth: # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    AuthenticationResponse:
+      description: User object
+      type: object
+      additionalProperties:
+          type: string
+    AuthenticationRequest:
+      description: User object
+      type: object
+      required:
+        - mail
+        - password
+      properties:
+        mail:
+          description: "user mail"
+          type: string
+          maxLength: 255
+        password:
+          description: "user mail"
+          type: string
+          maxLength: 255
+    RegisterRequest:
+      description: User object
+      type: object
+      required:
+        - firstName
+        - lastName
+        - mail
+        - password
+      properties:
+        uuid:
+          description: "uuid"
+          type: string
+          maxLength: 255
+        firstName:
+          description: "first name"
+          type: string
+          maxLength: 50
+        lastName:
+          description: "last name"
+          type: string
+          maxLength: 50
+        birthDate:
+          description: "birth date"
+          type: string
+        gender:
+          $ref: "#/components/schemas/Gender"
+        email:
+          description: "user mail"
+          type: string
+          maxLength: 255
+        password:
+          description: "user mail"
+          type: string
+          maxLength: 255
+
+    Gender:
+      description: "gender"
+      type: string
+      enum:
+        - MALE
+        - FEMALE
+
+    TokenType:
+      description: "type of token"
+      type: string
+      enum:
+        - access_token
+        - refresh_token
+        - activation_token
+
+    Error:
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          description: "Error code"
+          type: integer
+          format: int32
+        message:
+          description: "Error description"
+          type: string
+        description:
+          description: "Long description"
+          type: string

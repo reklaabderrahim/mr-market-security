@@ -1,0 +1,64 @@
+server:
+  port: 8084
+  servlet:
+    context-path: /secure
+
+rsa:
+  public-key: classpath:certs/public.pem
+  private-key: classpath:certs/private.pem
+spring:
+  application:
+    name: auth
+  datasource:
+    url: jdbc:postgresql://localhost:5432/security
+    username: marketOwner
+    password: marketOwner
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+  cloud:
+    config:
+      enabled: false
+
+springdoc:
+  show-actuator: true
+  use-management-port: true
+  paths-to-match: /v1/**
+
+management:
+  server:
+    port: 9090
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: openapi, swagger-ui, health
+
+logging:
+  pattern:
+    console: "%clr(%date{${LOG_DATEFORMAT_PATTERN}}){faint} %clr(${LOG_LEVEL_PATTERN}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([@project.artifactId@ @project.version@][%thread]){blue} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD}"
+    dateformat: "yyyy-MM-dd HH:mm:ss"
+    level: "%5p"
+    file: "%d{${LOG_DATEFORMAT_PATTERN}} ${LOG_LEVEL_PATTERN} [@project.artifactId@ @project.version@][%thread] --- [%t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD}"
+  exception-conversion-word: "-%wEx"
+  charset:
+    file: "utf-8"
+    console: "UTF-8"
+  file:
+    name: "/home/rekla/dev/logging/log"
+  level:
+    org:
+      springframework: debug
+      hibernate: debug
+    fr:
+      mr_market:
+        mr_market_security: debug
