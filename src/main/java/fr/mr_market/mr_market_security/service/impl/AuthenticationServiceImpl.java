@@ -56,12 +56,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
         var jwtToken = jwtService.generateTokens(storedToken.getAuthUser());
         revokeAllUserTokens(storedToken.getAuthUser());
-        saveUserToken(storedToken.getAuthUser(), jwtToken.get(TokenType.REFRESH_TOKEN));
+        saveUserToken(storedToken.getAuthUser(), jwtToken.get(TokenType.REFRESH_TOKEN.getValue()));
         return AuthenticationResponse.builder().token(jwtToken).build();
     }
 
     private void saveUserToken(AuthUser user, String jwtToken) {
-        var token = Token.builder().authUser(user).token(jwtToken).tokenType(TokenType.REFRESH_TOKEN).revoked(false).build();
+        var token = Token.builder().authUser(user).token(jwtToken).tokenType(TokenType.REFRESH_TOKEN).isRevoked(false).build();
         tokenRepository.save(token);
     }
 

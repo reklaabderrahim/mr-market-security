@@ -1,16 +1,16 @@
 CREATE TABLE if not exists auth_user
 (
-    id          BIGINT                 NOT NULL,
-    uuid        UUID                   NOT NULL,
-    create_date TIMESTAMP              NOT NULL,
-    first_name  CHARACTER VARYING(50)  NOT NULL,
-    last_name   CHARACTER VARYING(50)  NOT NULL,
-    birth_date  DATE                   NULL,
-    gender      CHARACTER VARYING(6)   NULL,
-    mail        CHARACTER VARYING(255) NOT NULL,
-    password    CHARACTER VARYING(255)  NOT NULL,
-    login_date  TIMESTAMP              NULL,
-    active      BOOLEAN DEFAULT FALSE  NOT NULL,
+    id          BIGINT                NOT NULL,
+    uuid        UUID                  NOT NULL,
+    create_date TIMESTAMP             NOT NULL,
+    first_name  VARCHAR(50)           NOT NULL,
+    last_name   VARCHAR(50)           NOT NULL,
+    birth_date  DATE                  NULL,
+    gender      VARCHAR(6)            NULL,
+    email        VARCHAR(100)          NOT NULL,
+    password    VARCHAR(255)          NOT NULL,
+    login_date  TIMESTAMP             NULL,
+    active      BOOLEAN DEFAULT FALSE NOT NULL,
     PRIMARY KEY (id),
     constraint auth_user_uuid_unique UNIQUE (uuid)
 );
@@ -23,7 +23,7 @@ comment on column auth_user.first_name is 'The auth_user first name';
 comment on column auth_user.last_name is 'The auth_user last name';
 comment on column auth_user.birth_date is 'The auth_user birth date';
 comment on column auth_user.gender is 'The auth_user gender';
-comment on column auth_user.mail is 'The auth_user email';
+comment on column auth_user.email is 'The auth_user email';
 comment on column auth_user.password is 'The auth_user password';
 comment on column auth_user.login_date is 'The auth_user last login date';
 comment on column auth_user.active is 'The auth_user status';
@@ -45,11 +45,11 @@ ALTER TABLE if exists auth_user_id_seq
 
 CREATE TABLE if not exists auth_user_role
 (
-    id           BIGINT                NOT NULL,
-    uuid         UUID                  NOT NULL,
-    auth_user_id BIGINT                NOT NULL,
-    role         CHARACTER VARYING(50) NOT NULL,
-    create_date  TIMESTAMP             NOT NULL,
+    id           BIGINT      NOT NULL,
+    uuid         UUID        NOT NULL,
+    auth_user_id BIGINT      NOT NULL,
+    role         VARCHAR(10) NOT NULL,
+    create_date  TIMESTAMP   NOT NULL,
     PRIMARY KEY (id),
     constraint auth_user_role_uuid_unique UNIQUE (uuid),
     constraint auth_user_role_unique UNIQUE (auth_user_id, role),
@@ -83,8 +83,8 @@ CREATE TABLE if not exists token
     id           BIGINT                NOT NULL,
     uuid         UUID                  NOT NULL,
     auth_user_id BIGINT                NOT NULL,
-    token        varchar(1000)                  NOT NULL,
-    tokenType    CHARACTER VARYING(50) NOT NULL,
+    token        VARCHAR(1000)         NOT NULL,
+    token_type    VARCHAR(20)           NOT NULL,
     create_date  TIMESTAMP             NOT NULL,
     is_revoked   BOOLEAN DEFAULT FALSE NOT NULL,
     PRIMARY KEY (id),

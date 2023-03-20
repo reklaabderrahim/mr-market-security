@@ -8,6 +8,7 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import fr.mr_market.mr_market_security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,6 +23,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 @RequiredArgsConstructor
@@ -63,5 +65,10 @@ public class AppConfig {
     @Bean
     JwtDecoder jwtDecoder(CertConfig certConfig) {
         return NimbusJwtDecoder.withPublicKey(certConfig.publicKey()).build();
+    }
+
+    @Bean
+    RestTemplate restTemplate() {
+        return new RestTemplateBuilder().build();
     }
 }

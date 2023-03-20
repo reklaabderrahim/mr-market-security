@@ -29,7 +29,7 @@ public class Token extends BaseEntity implements Serializable {
   @Enumerated(EnumType.STRING)
   public TokenType tokenType;
 
-  public boolean revoked;
+  public boolean isRevoked;
 
   @ManyToOne
   @JoinColumn(name = "auth_user_id")

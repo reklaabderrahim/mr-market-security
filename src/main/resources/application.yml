@@ -3,16 +3,10 @@ server:
   servlet:
     context-path: /secure
 
-rsa:
-  public-key: classpath:certs/public.pem
-  private-key: classpath:certs/private.pem
 spring:
   application:
     name: auth
   datasource:
-    url: jdbc:postgresql://localhost:5432/security
-    username: marketOwner
-    password: marketOwner
     driver-class-name: org.postgresql.Driver
   jpa:
     properties:
@@ -21,11 +15,14 @@ spring:
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
     show-sql: true
   cloud:
     config:
       enabled: false
+  config:
+    import: optional:secrets.yml
+
 
 springdoc:
   show-actuator: true
@@ -57,8 +54,9 @@ logging:
     name: "/home/rekla/dev/logging/log"
   level:
     org:
-      springframework: debug
-      hibernate: debug
+      springframework:
+        security: trace
+      hibernate: info
     fr:
       mr_market:
         mr_market_security: debug
