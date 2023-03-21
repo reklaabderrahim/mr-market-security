@@ -1,16 +1,19 @@
 CREATE TABLE if not exists auth_user
 (
-    id          BIGINT                NOT NULL,
-    uuid        UUID                  NOT NULL,
-    create_date TIMESTAMP             NOT NULL,
-    first_name  VARCHAR(50)           NOT NULL,
-    last_name   VARCHAR(50)           NOT NULL,
-    birth_date  DATE                  NULL,
-    gender      VARCHAR(6)            NULL,
-    email        VARCHAR(100)          NOT NULL,
-    password    VARCHAR(255)          NOT NULL,
-    login_date  TIMESTAMP             NULL,
-    active      BOOLEAN DEFAULT FALSE NOT NULL,
+    id             BIGINT                NOT NULL,
+    uuid           UUID                  NOT NULL,
+    create_date    TIMESTAMP             NOT NULL,
+    first_name     VARCHAR(50)           NOT NULL,
+    last_name      VARCHAR(50)           NOT NULL,
+    birth_date     DATE                  NULL,
+    image_url      TEXT                  NULL,
+    provider       VARCHAR(15)           NOT NULL,
+    provider_id    VARCHAR(255)          NOT NULL,
+    email          VARCHAR(100)          NOT NULL,
+    password       VARCHAR(255)          NOT NULL,
+    login_date     TIMESTAMP             NULL,
+    active         BOOLEAN DEFAULT FALSE NOT NULL,
+    email_verified BOOLEAN DEFAULT FALSE NOT NULL,
     PRIMARY KEY (id),
     constraint auth_user_uuid_unique UNIQUE (uuid)
 );
@@ -22,7 +25,10 @@ comment on column auth_user.create_date is 'The auth_user creation (insert) date
 comment on column auth_user.first_name is 'The auth_user first name';
 comment on column auth_user.last_name is 'The auth_user last name';
 comment on column auth_user.birth_date is 'The auth_user birth date';
-comment on column auth_user.gender is 'The auth_user gender';
+comment on column auth_user.image_url is 'The auth_user image provider';
+comment on column auth_user.provider is 'The auth_user provider';
+comment on column auth_user.provider_id is 'The auth_user provider id';
+comment on column auth_user.email_verified is 'The auth_user is email verified';
 comment on column auth_user.email is 'The auth_user email';
 comment on column auth_user.password is 'The auth_user password';
 comment on column auth_user.login_date is 'The auth_user last login date';
@@ -46,12 +52,9 @@ ALTER TABLE if exists auth_user_id_seq
 CREATE TABLE if not exists auth_user_role
 (
     id           BIGINT      NOT NULL,
-    uuid         UUID        NOT NULL,
     auth_user_id BIGINT      NOT NULL,
     role         VARCHAR(10) NOT NULL,
-    create_date  TIMESTAMP   NOT NULL,
     PRIMARY KEY (id),
-    constraint auth_user_role_uuid_unique UNIQUE (uuid),
     constraint auth_user_role_unique UNIQUE (auth_user_id, role),
     CONSTRAINT auth_user_role_auth_user_id_fk FOREIGN KEY (auth_user_id) REFERENCES auth_user (id)
 );
@@ -73,8 +76,6 @@ ALTER TABLE if exists auth_user_role_id_seq
 comment on table auth_user_role is 'users roles table';
 comment on column auth_user_role.auth_user_id is 'The auth user ID';
 comment on column auth_user_role.role is 'The auth user role';
-comment on column auth_user_role.uuid is 'The auth_user unique identifier';
-comment on column auth_user_role.create_date is 'The auth_user creation (insert) date';
 
 /**************************************************************************************************/
 
@@ -84,7 +85,7 @@ CREATE TABLE if not exists token
     uuid         UUID                  NOT NULL,
     auth_user_id BIGINT                NOT NULL,
     token        VARCHAR(1000)         NOT NULL,
-    token_type    VARCHAR(20)           NOT NULL,
+    token_type   VARCHAR(20)           NOT NULL,
     create_date  TIMESTAMP             NOT NULL,
     is_revoked   BOOLEAN DEFAULT FALSE NOT NULL,
     PRIMARY KEY (id),
