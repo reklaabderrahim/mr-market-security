@@ -9,7 +9,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -34,6 +36,22 @@ public class Token extends BaseEntity implements Serializable {
   @ManyToOne
   @JoinColumn(name = "auth_user_id")
   public AuthUser authUser;
+
+  public static Token create(String inputToken, TokenType tokenType, boolean isRevoked) {
+    Token token = new Token();
+    token.setUuid(UUID.randomUUID());
+    token.setCreateDate(LocalDateTime.now());
+    token.setToken(inputToken);
+    token.setTokenType(tokenType);
+    token.setRevoked(isRevoked);
+    return token;
+  }
+
+  public static Token create(String inputToken, TokenType tokenType, boolean isRevoked, AuthUser authUser) {
+    Token token = create(inputToken, tokenType, isRevoked);
+    token.setAuthUser(authUser);
+    return token;
+  }
 
   @Override
   public boolean equals(Object o) {

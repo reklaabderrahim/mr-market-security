@@ -3,6 +3,7 @@ package fr.mr_market.mr_market_security.service.impl;
 import fr.mr_market.mr_market_security.exception.UnauthorizedException;
 import fr.mr_market.mr_market_security.model.token.Token;
 import fr.mr_market.mr_market_security.model.token.TokenType;
+import fr.mr_market.mr_market_security.model.user.AuthUser;
 import fr.mr_market.mr_market_security.repository.TokenRepository;
 import fr.mr_market.mr_market_security.service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,9 +38,11 @@ public class JwtServiceImpl implements JwtService {
     }
 
     public String generateAccessToken(UserDetails userDetails) {
-        String authorities = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(" "));
+        String authorities = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority).collect(Collectors.joining(" "));
         Instant now = Instant.now();
-        var jwtClaimsSet = encodeToken(userDetails.getUsername(), now, now.plus(30, ChronoUnit.SECONDS)).claim("role", authorities).build();
+        var jwtClaimsSet = encodeToken(userDetails.getUsername(),
+                now, now.plus(300, ChronoUnit.SECONDS)).claim("scope", authorities).build();
         return jwtEncoder.encode(JwtEncoderParameters.from(jwtClaimsSet)).getTokenValue();
     }
 
@@ -61,6 +64,18 @@ public class JwtServiceImpl implements JwtService {
             throw new UnauthorizedException("An error occurred while attempting to decode the Jwt");
         }
         return tokenRepository.findByToken(jwt.getTokenValue()).orElseThrow(() -> new UnauthorizedException("Token not found"));
+    }
+    public void saveUserToken(AuthUser user, String jwtToken) {
+        var token = Token.create(jwtToken, TokenType.REFRESH_TOKEN, false, user);
+        tokenRepository.save(token);
+    }
+    public void revokeAllUserTokens(AuthUser user) {
+        var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
+        if (validUserTokens.isEmpty()) return;
+        validUserTokens.forEach(token -> {
+            token.setRevoked(true);
+        });
+        tokenRepository.saveAll(validUserTokens);
     }
 
     private JwtClaimsSet.Builder encodeToken(String username, Instant startDate, Instant endDate) {

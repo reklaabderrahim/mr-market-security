@@ -6,7 +6,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import fr.mr_market.mr_market_security.repository.UserRepository;
+import fr.mr_market.mr_market_security.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -16,7 +16,6 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -29,12 +28,11 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class AppConfig {
 
-    private final UserRepository repository;
+    private final CustomUserDetailsService userDetailsService;
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> repository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return userDetailsService::findByEmail;
     }
 
     @Bean
@@ -56,15 +54,15 @@ public class AppConfig {
     }
 
     @Bean
-    JwtEncoder jwtEncoder(CertConfig certConfig) {
-        JWK jwk = new RSAKey.Builder(certConfig.publicKey()).privateKey(certConfig.privateKey()).build();
+    JwtEncoder jwtEncoder(AppProperties appProperties) {
+        JWK jwk = new RSAKey.Builder(appProperties.getRsa().getPublicKey()).privateKey(appProperties.getRsa().getPrivateKey()).build();
         JWKSource<SecurityContext> jwkSource = new ImmutableJWKSet<>(new JWKSet(jwk));
         return new NimbusJwtEncoder(jwkSource);
     }
 
     @Bean
-    JwtDecoder jwtDecoder(CertConfig certConfig) {
-        return NimbusJwtDecoder.withPublicKey(certConfig.publicKey()).build();
+    JwtDecoder jwtDecoder(AppProperties appProperties) {
+        return NimbusJwtDecoder.withPublicKey(appProperties.getRsa().getPublicKey()).build();
     }
 
     @Bean

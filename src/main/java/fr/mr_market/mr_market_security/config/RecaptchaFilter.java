@@ -22,7 +22,7 @@ public class RecaptchaFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if(request.getMethod().equals("POST") ) {
+        if(request.getMethod().equals("POST") && recaptchaService.isActif()) {
             String recaptcha = request.getHeader("recaptcha");
             RecaptchaResponse recaptchaResponse = recaptchaService.validateToken(recaptcha);
             if(!recaptchaResponse.success()) {

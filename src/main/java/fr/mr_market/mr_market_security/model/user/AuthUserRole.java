@@ -18,7 +18,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @Entity
 @Table(name = "auth_user_role")
-public class AuthUserRole extends BaseEntity implements Serializable, GrantedAuthority {
+public class AuthUserRole implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "auth_user_role_id_seq")
@@ -31,20 +31,21 @@ public class AuthUserRole extends BaseEntity implements Serializable, GrantedAut
     @JoinColumn(name = "auth_user_id")
     public AuthUser authUser;
 
-    @Override
-    public String getAuthority() {
-        return (role != null) ? "ROLE_" + role.getValue().trim().toUpperCase() : null;
+    public static AuthUserRole create(Role role) {
+        AuthUserRole authUserRole = new AuthUserRole();
+        authUserRole.setRole(role);
+        return authUserRole;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof AuthUserRole authUserRole)) return false;
-        return Objects.equals(getUuid(), authUserRole.getUuid());
+        return Objects.equals(id, authUserRole.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getUuid());
+        return Objects.hash(getId());
     }
 }

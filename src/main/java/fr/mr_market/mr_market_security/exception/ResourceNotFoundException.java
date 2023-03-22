@@ -2,13 +2,13 @@ package fr.mr_market.mr_market_security.exception;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class UserNotFoundException extends GenericException {
+public class ResourceNotFoundException extends GenericException {
 
-    public UserNotFoundException(String message) {
+    public ResourceNotFoundException(String message) {
         super(message);
     }
 
-    public UserNotFoundException(String message, String param) {
+    public ResourceNotFoundException(String message, String param) {
         super(StringUtils.replace(message, "{}", param));
     }
 }
