@@ -1,3 +1,18 @@
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = ON;
+SET check_function_bodies = FALSE;
+SET client_min_messages = WARNING;
+SET row_security = OFF;
+
+
+CREATE SCHEMA IF NOT EXISTS security;
+ALTER SCHEMA security OWNER TO market_owner;
+SET search_path = security, pg_catalog;
+SET default_tablespace = '';
+SET default_with_oids = FALSE;
+
 CREATE TABLE if not exists auth_user
 (
     id             BIGINT                NOT NULL,
@@ -35,7 +50,7 @@ comment on column auth_user.login_date is 'The auth_user last login date';
 comment on column auth_user.active is 'The auth_user status';
 
 ALTER TABLE if exists auth_user
-    OWNER TO marketOwner;
+    OWNER TO market_owner;
 
 CREATE SEQUENCE if not exists auth_user_id_seq
     START WITH 1
@@ -45,7 +60,7 @@ CREATE SEQUENCE if not exists auth_user_id_seq
     CACHE 1;
 
 ALTER TABLE if exists auth_user_id_seq
-    OWNER TO marketOwner;
+    OWNER TO market_owner;
 
 /**************************************************************************************************/
 
@@ -60,7 +75,7 @@ CREATE TABLE if not exists auth_user_role
 );
 
 ALTER TABLE if exists roles
-    OWNER TO marketOwner;
+    OWNER TO market_owner;
 
 CREATE SEQUENCE if not exists auth_user_role_id_seq
     START WITH 1
@@ -71,7 +86,7 @@ CREATE SEQUENCE if not exists auth_user_role_id_seq
 
 
 ALTER TABLE if exists auth_user_role_id_seq
-    OWNER TO marketOwner;
+    OWNER TO market_owner;
 
 comment on table auth_user_role is 'users roles table';
 comment on column auth_user_role.auth_user_id is 'The auth user ID';
@@ -95,7 +110,7 @@ CREATE TABLE if not exists token
 );
 
 ALTER TABLE if exists token
-    OWNER TO marketOwner;
+    OWNER TO market_owner;
 
 CREATE SEQUENCE if not exists token_id_seq
     START WITH 1
@@ -105,8 +120,7 @@ CREATE SEQUENCE if not exists token_id_seq
     CACHE 1;
 
 
-ALTER TABLE if exists token_id_seq
-    OWNER TO marketOwner;
+ALTER TABLE if exists token_id_seq OWNER TO market_owner;
 
 comment on table token is 'Token table';
 comment on column token.id is 'The token ID';
@@ -114,3 +128,70 @@ comment on column token.uuid is 'The token unique identifier';
 comment on column token.auth_user_id is 'auth_user Id (Foreign key)';
 comment on column token.create_date is 'The token creation date';
 comment on column token.is_revoked is 'is token revoked';
+
+/***************************************************************************************/
+SELECT pg_catalog.setval('auth_user_id_seq', 1, FALSE);
+SELECT pg_catalog.setval('auth_user_role_id_seq', 1, FALSE);
+SELECT pg_catalog.setval('token_id_seq', 1, FALSE);
+
+
+REVOKE ALL ON SCHEMA security FROM PUBLIC;
+REVOKE ALL ON SCHEMA security FROM market_owner;
+GRANT ALL ON SCHEMA security TO market_owner;
+GRANT USAGE ON SCHEMA security TO market_select;
+GRANT USAGE ON SCHEMA security TO market_update;
+
+
+REVOKE ALL ON TABLE auth_user FROM PUBLIC;
+REVOKE ALL ON TABLE auth_user FROM market_owner;
+GRANT ALL ON TABLE auth_user TO market_owner;
+GRANT SELECT, INSERT, DELETE, TRUNCATE, UPDATE ON TABLE auth_user TO market_update;
+GRANT SELECT ON TABLE auth_user TO market_select;
+
+REVOKE ALL ON SEQUENCE auth_user_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE auth_user_id_seq FROM market_owner;
+GRANT ALL ON SEQUENCE auth_user_id_seq TO market_owner;
+GRANT USAGE ON SEQUENCE auth_user_id_seq TO market_select;
+
+
+REVOKE ALL ON TABLE auth_user_role FROM PUBLIC;
+REVOKE ALL ON TABLE auth_user_role FROM market_owner;
+GRANT ALL ON TABLE auth_user_role TO market_owner;
+GRANT SELECT, INSERT, DELETE, TRUNCATE, UPDATE ON TABLE auth_user_role TO market_update;
+GRANT SELECT ON TABLE auth_user_role TO market_select;
+
+REVOKE ALL ON SEQUENCE auth_user_role_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE auth_user_role_id_seq FROM market_owner;
+GRANT ALL ON SEQUENCE auth_user_role_id_seq TO market_owner;
+GRANT USAGE ON SEQUENCE auth_user_role_id_seq TO market_select;
+
+
+REVOKE ALL ON TABLE token FROM PUBLIC;
+REVOKE ALL ON TABLE token FROM market_owner;
+GRANT ALL ON TABLE token TO market_owner;
+GRANT SELECT, INSERT, DELETE, TRUNCATE, UPDATE ON TABLE token TO market_update;
+GRANT SELECT ON TABLE token TO market_select;
+
+REVOKE ALL ON SEQUENCE token_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE token_id_seq FROM market_owner;
+GRANT ALL ON SEQUENCE token_id_seq TO market_owner;
+GRANT USAGE ON SEQUENCE token_id_seq TO market_select;
+
+
+ALTER DEFAULT PRIVILEGES FOR ROLE market_owner IN SCHEMA security REVOKE ALL ON SEQUENCES FROM PUBLIC;
+ALTER DEFAULT PRIVILEGES FOR ROLE market_owner IN SCHEMA security REVOKE ALL ON SEQUENCES FROM market_owner;
+ALTER DEFAULT PRIVILEGES FOR ROLE market_owner IN SCHEMA security GRANT ALL ON SEQUENCES TO market_owner;
+ALTER DEFAULT PRIVILEGES FOR ROLE market_owner IN SCHEMA security GRANT USAGE ON SEQUENCES TO market_select;
+
+
+ALTER DEFAULT PRIVILEGES FOR ROLE market_owner IN SCHEMA security REVOKE ALL ON FUNCTIONS FROM PUBLIC;
+ALTER DEFAULT PRIVILEGES FOR ROLE market_owner IN SCHEMA security REVOKE ALL ON FUNCTIONS FROM market_owner;
+ALTER DEFAULT PRIVILEGES FOR ROLE market_owner IN SCHEMA security GRANT ALL ON FUNCTIONS TO market_owner;
+ALTER DEFAULT PRIVILEGES FOR ROLE market_owner IN SCHEMA security GRANT ALL ON FUNCTIONS TO market_select;
+
+
+ALTER DEFAULT PRIVILEGES FOR ROLE market_owner IN SCHEMA security REVOKE ALL ON TABLES FROM PUBLIC;
+ALTER DEFAULT PRIVILEGES FOR ROLE market_owner IN SCHEMA security REVOKE ALL ON TABLES FROM market_owner;
+ALTER DEFAULT PRIVILEGES FOR ROLE market_owner IN SCHEMA security GRANT ALL ON TABLES TO market_owner;
+ALTER DEFAULT PRIVILEGES FOR ROLE market_owner IN SCHEMA security GRANT SELECT, INSERT, DELETE, TRUNCATE, UPDATE ON TABLES TO market_update;
+ALTER DEFAULT PRIVILEGES FOR ROLE market_owner IN SCHEMA security GRANT SELECT ON TABLES TO market_select;
