@@ -5,8 +5,6 @@ SET standard_conforming_strings = ON;
 SET check_function_bodies = FALSE;
 SET client_min_messages = WARNING;
 SET row_security = OFF;
-
-
 CREATE SCHEMA IF NOT EXISTS security;
 ALTER SCHEMA security OWNER TO market_owner;
 SET search_path = security, pg_catalog;
