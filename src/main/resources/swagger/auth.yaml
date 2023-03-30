@@ -18,6 +18,39 @@ tags:
 servers:
   - url: http://api.market.dz/auth/api/v1
 paths:
+  /auth/confirm:
+    post:
+      tags:
+        - apiAuth
+      operationId: confirm
+      summary: confirm user
+      description: "Confirm a user"
+      deprecated: false
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: "#/components/schemas/AuthenticationResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: "#/components/schemas/Error"
   /auth/register:
     post:
       tags:

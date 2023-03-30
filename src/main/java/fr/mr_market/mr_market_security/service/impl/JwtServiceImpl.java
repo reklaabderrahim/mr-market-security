@@ -28,6 +28,7 @@ public class JwtServiceImpl implements JwtService {
     private final TokenRepository tokenRepository;
     private final JwtDecoder jwtDecoder;
 
+    @Override
     public Map<String, String> generateTokens(UserDetails userDetails) {
         Map<String, String> token = new HashMap<>();
         String accessToken = generateAccessToken(userDetails);
@@ -37,6 +38,7 @@ public class JwtServiceImpl implements JwtService {
         return token;
     }
 
+    @Override
     public String generateAccessToken(UserDetails userDetails) {
         String authorities = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority).collect(Collectors.joining(" "));
@@ -46,25 +48,44 @@ public class JwtServiceImpl implements JwtService {
         return jwtEncoder.encode(JwtEncoderParameters.from(jwtClaimsSet)).getTokenValue();
     }
 
+    @Override
+    public String generateAccessToken(String username, Integer seconds, String authorities) {
+        Instant now = Instant.now();
+        var jwtClaimsSet = encodeToken(username, now, now.plus(seconds, ChronoUnit.SECONDS)).claim("scope", authorities).build();
+        return jwtEncoder.encode(JwtEncoderParameters.from(jwtClaimsSet)).getTokenValue();
+    }
+
+    @Override
     public String generateRefreshToken(UserDetails userDetails) {
         Instant now = Instant.now();
         var jwtClaimsSet = encodeToken(userDetails.getUsername(), now, now.plus(ONE_MONTH, ChronoUnit.SECONDS)).build();
         return jwtEncoder.encode(JwtEncoderParameters.from(jwtClaimsSet)).getTokenValue();
     }
 
+    @Override
     public Token verifyToken(HttpServletRequest request) {
         final String authHeader = request.getHeader("Authorization");
+        return _verifyToken(authHeader);
+    }
+
+    @Override
+    public Token verifyToken(String token) {
+        return _verifyToken(token);
+    }
+
+    private Token _verifyToken(String token) {
         final Jwt jwt;
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (token == null) {
             throw new UnauthorizedException("No authorization found within the request");
         }
         try {
-            jwt = jwtDecoder.decode(authHeader);
+            jwt = jwtDecoder.decode(token);
         } catch (JwtException e) {
             throw new UnauthorizedException("An error occurred while attempting to decode the Jwt");
         }
         return tokenRepository.findByToken(jwt.getTokenValue()).orElseThrow(() -> new UnauthorizedException("Token not found"));
     }
+
     public void saveUserToken(AuthUser user, String jwtToken) {
         var token = Token.create(jwtToken, TokenType.REFRESH_TOKEN, false, user);
         tokenRepository.save(token);

@@ -1,5 +1,8 @@
 package fr.mr_market.mr_market_security.controller;
 
+import fr.mr_market.mr_market_security.feign.NotificationFeignClient;
+import fr.mr_market.mr_market_security.model.mail.MailRequest;
+import fr.mr_market.mr_market_security.model.mail.MailType;
 import fr.mr_market.mr_market_security.model.user.AuthProvider;
 import fr.mr_market.mr_market_security.model.user.AuthUser;
 import fr.mr_market.mr_market_security.model.user.Role;
@@ -9,6 +12,7 @@ import fr.mr_market.mr_market_security.swagger.model.authUser.AuthenticationRequ
 import fr.mr_market.mr_market_security.swagger.model.authUser.RegisterRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,17 +24,23 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1")
 @Slf4j
 public class AuthController implements AuthApi {
 
     private final AuthenticationService authenticationService;
-    private HttpServletRequest httpServletRequest;
+    private final NotificationFeignClient notificationFeignClient;
+    private final HttpServletRequest httpServletRequest;
 
-    public AuthController(AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
+    @Override
+    @Operation(operationId = "confirm")
+    public ResponseEntity<Map<String, String>> confirm(String token) {
+        log.debug("controller:: confirm token: {}", token);
+        return AuthApi.super.confirm(token);
     }
 
     @Override
@@ -54,6 +64,8 @@ public class AuthController implements AuthApi {
         AuthUser register =
                 authenticationService.register(registerMapper(registerRequest), Collections.singletonList(Role.USER), null
                 );
+        MailRequest mailRequest = new MailRequest(Set.of(registerRequest.getEmail()), MailType.ACCOUNT_ACTIVATION, "https://google.fr");
+        notificationFeignClient.sendTestReport(mailRequest);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentContextPath().path("/user/me")
                 .buildAndExpand(register.getId()).toUri();

@@ -53,7 +53,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     public AuthenticationResponse refreshToken(HttpServletRequest request) {
-        Token storedToken = jwtService.verifyToken(request);
+        return generateToken(jwtService.verifyToken(request));
+    }
+
+    public AuthenticationResponse confirm(String token) {
+        return generateToken(jwtService.verifyToken(token));
+    }
+
+    private AuthenticationResponse generateToken(Token jwtService) {
+        Token storedToken = jwtService;
 
         if (storedToken.isRevoked()) {
             throw new UnauthorizedException("You can't request login temporarily");
