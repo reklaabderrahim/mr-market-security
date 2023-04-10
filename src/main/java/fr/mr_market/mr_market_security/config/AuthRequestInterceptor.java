@@ -12,7 +12,7 @@ public class AuthRequestInterceptor implements RequestInterceptor {
     private final JwtService jwtService;
     @Override
     public void apply(RequestTemplate requestTemplate) {
-        String accessToken = jwtService.generateAccessToken("internal", 2, "internal");
+        String accessToken = jwtService.generateToken("internal", 2, "internal");
         requestTemplate.header("Authorisation", accessToken);
     }
 }

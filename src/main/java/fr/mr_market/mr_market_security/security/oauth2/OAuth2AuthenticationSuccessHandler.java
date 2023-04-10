@@ -7,7 +7,6 @@ import fr.mr_market.mr_market_security.model.user.AuthUser;
 import fr.mr_market.mr_market_security.service.CustomUserDetailsService;
 import fr.mr_market.mr_market_security.service.JwtService;
 import fr.mr_market.mr_market_security.utils.CookieUtils;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,12 +26,12 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     public static final String REDIRECT_URI_PARAM_COOKIE_NAME = "redirect_uri";
     private final CustomUserDetailsService userDetailsService;
-    private JwtService jwtService;
-    private AppProperties appProperties;
-    private HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
+    private final JwtService jwtService;
+    private final AppProperties appProperties;
+    private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         String targetUrl = determineTargetUrl(request, response, authentication);
 
         if (response.isCommitted()) {
@@ -56,7 +55,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         var user = (AuthUser) userDetailsService.findByEmail(authentication.getName());
         var jwtToken = jwtService.generateTokens(user);
         jwtService.revokeAllUserTokens(user);
-        jwtService.saveUserToken(user, jwtToken.get(TokenType.REFRESH_TOKEN.getValue()));
+        jwtService.saveUserToken(user, jwtToken.get(TokenType.REFRESH_TOKEN.getValue()), TokenType.REFRESH_TOKEN);
 
         return UriComponentsBuilder.fromUriString(targetUrl).queryParam("token", jwtToken.get(TokenType.REFRESH_TOKEN.getValue())).build().toUriString();
     }

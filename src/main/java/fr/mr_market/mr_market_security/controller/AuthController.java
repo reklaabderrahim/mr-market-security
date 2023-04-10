@@ -1,10 +1,11 @@
 package fr.mr_market.mr_market_security.controller;
 
 import fr.mr_market.mr_market_security.feign.NotificationFeignClient;
+import fr.mr_market.mr_market_security.model.auth.AuthenticationResponse;
 import fr.mr_market.mr_market_security.model.mail.MailRequest;
 import fr.mr_market.mr_market_security.model.mail.MailType;
+import fr.mr_market.mr_market_security.model.token.TokenType;
 import fr.mr_market.mr_market_security.model.user.AuthProvider;
-import fr.mr_market.mr_market_security.model.user.AuthUser;
 import fr.mr_market.mr_market_security.model.user.Role;
 import fr.mr_market.mr_market_security.service.AuthenticationService;
 import fr.mr_market.mr_market_security.swagger.AuthApi;
@@ -18,9 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,9 +37,9 @@ public class AuthController implements AuthApi {
 
     @Override
     @Operation(operationId = "confirm")
-    public ResponseEntity<Map<String, String>> confirm(String token) {
+    public ResponseEntity<Map<String, String>> confirm(String token, String email) {
         log.debug("controller:: confirm token: {}", token);
-        return AuthApi.super.confirm(token);
+        return new ResponseEntity<>(authenticationService.confirm(token, email).getToken(), HttpStatus.OK);
     }
 
     @Override
@@ -61,19 +60,21 @@ public class AuthController implements AuthApi {
     @Operation(operationId = "register")
     public ResponseEntity<Map<String, String>> register(RegisterRequest registerRequest) {
         log.debug("controller:: create user: {}", registerRequest);
-        AuthUser register =
+        AuthenticationResponse authenticationResponse =
                 authenticationService.register(registerMapper(registerRequest), Collections.singletonList(Role.USER), null
                 );
-        MailRequest mailRequest = new MailRequest(Set.of(registerRequest.getEmail()), MailType.ACCOUNT_ACTIVATION, "https://google.fr");
-        notificationFeignClient.sendTestReport(mailRequest);
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentContextPath().path("/user/me")
-                .buildAndExpand(register.getId()).toUri();
+        String callbackUrl = "http://localhost:8083/auth/api/v1/auth/confirm" + "?" +
+                "token=" +
+                authenticationResponse.getToken().get(TokenType.ACTIVATION_TOKEN.getValue()) +
+                "&" +
+                "email=" +
+                registerRequest.getEmail();
+        MailRequest mailRequest = new MailRequest(Set.of(registerRequest.getEmail()), MailType.ACCOUNT_ACTIVATION, callbackUrl);
+        notificationFeignClient.sendEmail(mailRequest);
 
         Map<String, String> result = new HashMap<>();
         result.put("status", "User registered successfully@");
-        return ResponseEntity.created(location)
-                .body(result);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     private fr.mr_market.mr_market_security.model.auth.RegisterRequest registerMapper(RegisterRequest registerRequest) {

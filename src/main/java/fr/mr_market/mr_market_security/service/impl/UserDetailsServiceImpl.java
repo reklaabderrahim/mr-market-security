@@ -1,9 +1,7 @@
 package fr.mr_market.mr_market_security.service.impl;
 
-import fr.mr_market.mr_market_security.exception.ResourceNotFoundException;
 import fr.mr_market.mr_market_security.model.auth.RegisterRequest;
 import fr.mr_market.mr_market_security.model.user.AuthUser;
-import fr.mr_market.mr_market_security.model.user.AuthUserRole;
 import fr.mr_market.mr_market_security.model.user.Role;
 import fr.mr_market.mr_market_security.repository.UserRepository;
 import fr.mr_market.mr_market_security.service.CustomUserDetailsService;
@@ -32,13 +30,6 @@ public class UserDetailsServiceImpl implements CustomUserDetailsService {
     }
 
     @Override
-    public AuthUser loadUserById(Integer id) {
-        return userRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("User not found with id : {}", Integer.toString(id))
-        );
-    }
-
-    @Override
     public AuthUser createUser(RegisterRequest registerRequest, List<Role> roles, Map<String, Object> attributes) {
         AuthUser authUser = AuthUser.create(registerRequest, roles, attributes);
         return userRepository.save(authUser);
@@ -47,6 +38,11 @@ public class UserDetailsServiceImpl implements CustomUserDetailsService {
     @Override
     public AuthUser create(AuthUser authUser) {
         return userRepository.save(authUser);
+    }
+
+    @Override
+    public void update(AuthUser authUser) {
+        userRepository.saveAndFlush(authUser);
     }
 
     @Override

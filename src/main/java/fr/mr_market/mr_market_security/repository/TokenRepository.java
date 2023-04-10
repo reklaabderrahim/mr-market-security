@@ -1,6 +1,7 @@
 package fr.mr_market.mr_market_security.repository;
 
 import fr.mr_market.mr_market_security.model.token.Token;
+import fr.mr_market.mr_market_security.model.token.TokenType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -16,5 +17,7 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
             """)
     List<Token> findAllValidTokenByUser(Long id);
 
-    Optional<Token> findByToken(String token);
+    Optional<Token> findByTokenAndAuthUser_emailAndTokenTypeIn(String token, String email, List<TokenType> tokenTypes);
+
+    Optional<Token> findByTokenAndTokenTypeIn(String token, List<TokenType> tokenTypes);
 }

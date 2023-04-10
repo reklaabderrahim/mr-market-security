@@ -14,11 +14,11 @@ public interface CustomUserDetailsService {
 
     Optional<AuthUser> findByEmailOptional(String email);
 
-    AuthUser loadUserById(Integer id);
-
     AuthUser createUser(RegisterRequest registerRequest, List<Role> roles, Map<String, Object> attributes);
 
     AuthUser create(AuthUser authUser);
+
+    void update(AuthUser authUser);
 
     Boolean existsByEmail(String email);
 }

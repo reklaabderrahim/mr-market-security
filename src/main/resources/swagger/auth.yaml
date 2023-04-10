@@ -28,7 +28,12 @@ paths:
       deprecated: false
       parameters:
         - name: token
-          in: path
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: email
+          in: query
           required: true
           schema:
             type: string

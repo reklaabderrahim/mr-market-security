@@ -1,25 +1,23 @@
 package fr.mr_market.mr_market_security.service;
 
 import fr.mr_market.mr_market_security.model.token.Token;
+import fr.mr_market.mr_market_security.model.token.TokenType;
 import fr.mr_market.mr_market_security.model.user.AuthUser;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.List;
 import java.util.Map;
 
 public interface JwtService {
+    String generateToken(String username, Integer seconds, String authorities);
+
     Map<String, String> generateTokens(UserDetails userDetails);
 
-    String generateAccessToken(UserDetails userDetails);
+    Token verifyToken(String token, String email, List<TokenType> tokenTypes);
 
-    String generateAccessToken(String username, Integer seconds, String authorities);
+    Token verifyToken(String token, List<TokenType> tokenTypes);
 
-    String generateRefreshToken(UserDetails userDetails);
-
-    Token verifyToken(HttpServletRequest request);
-    Token verifyToken(String token);
-
-    void saveUserToken(AuthUser user, String jwtToken);
+    void saveUserToken(AuthUser user, String jwtToken, TokenType tokenType);
 
     void revokeAllUserTokens(AuthUser user);
 }

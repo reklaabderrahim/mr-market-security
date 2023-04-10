@@ -12,5 +12,5 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface NotificationFeignClient {
     @PostMapping("/notification/api/v1/mailProcessing")
     @Headers("Content-Type: application/json")
-    ResponseEntity<MailResponse> sendTestReport(@RequestBody MailRequest request);
+    ResponseEntity<MailResponse> sendEmail(@RequestBody MailRequest request);
 }
