@@ -28,7 +28,6 @@ public class AppProperties {
     public static class Recaptcha {
         private String verifyUrl;
         private String secretKey;
-
         private Boolean disabled;
     }
 

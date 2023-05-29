@@ -47,19 +47,6 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .formLogin().disable().httpBasic().disable().exceptionHandling()
                 .authenticationEntryPoint(new RestAuthenticationEntryPoint()).and()
-//                .authorizeHttpRequests()
-//                    .requestMatchers("/",
-//                            "/error",
-//                            "/favicon.ico",
-//                            "/**/*.png",
-//                            "/**/*.gif",
-//                            "/**/*.svg",
-//                            "/**/*.jpg",
-//                            "/**/*.html",
-//                            "/**/*.css",
-//                            "/**/*.js")
-//                    .permitAll()
-//                    .and()
                 .authorizeHttpRequests().requestMatchers("/api/v1/auth/**", "/api/v1/oauth2/**").permitAll().anyRequest().authenticated().and().
                 authenticationProvider(authenticationProvider).oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
                 .addFilterBefore(new RecaptchaFilter(recaptchaService), UsernamePasswordAuthenticationFilter.class)
