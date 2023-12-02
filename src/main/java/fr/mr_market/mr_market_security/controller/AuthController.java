@@ -1,5 +1,6 @@
 package fr.mr_market.mr_market_security.controller;
 
+import fr.mr_market.mr_market_security.kafka.MessageProducer;
 import fr.mr_market.mr_market_security.feign.NotificationFeignClient;
 import fr.mr_market.mr_market_security.model.auth.AuthenticationResponse;
 import fr.mr_market.mr_market_security.model.mail.MailRequest;
@@ -34,6 +35,7 @@ public class AuthController implements AuthApi {
     private final AuthenticationService authenticationService;
     private final NotificationFeignClient notificationFeignClient;
     private final HttpServletRequest httpServletRequest;
+    private final MessageProducer messageProducer;
 
     @Override
     @Operation(operationId = "confirm")
@@ -63,14 +65,15 @@ public class AuthController implements AuthApi {
         AuthenticationResponse authenticationResponse =
                 authenticationService.register(registerMapper(registerRequest), Collections.singletonList(Role.USER), null
                 );
-        String callbackUrl = "http://localhost:8083/auth/api/v1/auth/confirm" + "?" +
+        String callbackUrl = "http://localhost:8085/auth/api/v1/auth/confirm" + "?" +
                 "token=" +
                 authenticationResponse.getToken().get(TokenType.ACTIVATION_TOKEN.getValue()) +
                 "&" +
                 "email=" +
                 registerRequest.getEmail();
         MailRequest mailRequest = new MailRequest(Set.of(registerRequest.getEmail()), MailType.ACCOUNT_ACTIVATION, callbackUrl);
-        notificationFeignClient.sendEmail(mailRequest);
+        log.debug("controller:: send mail message: {}", mailRequest);
+        messageProducer.sendEmailMessage("mail-register", mailRequest);
 
         Map<String, String> result = new HashMap<>();
         result.put("status", "User registered successfully@");

@@ -7,6 +7,7 @@ import fr.mr_market.mr_market_security.swagger.model.authUser.Error;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -52,7 +53,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return error;
     }
 
-    @ExceptionHandler(value = {UnauthorizedException.class})
+    @ExceptionHandler(value = {UnauthorizedException.class, AccessDeniedException.class})
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
     protected Error handleUnauthorizedException(RuntimeException ex) {
         log.error(ex.getMessage());
