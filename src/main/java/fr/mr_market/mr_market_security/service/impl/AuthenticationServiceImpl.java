@@ -51,6 +51,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         var user = userDetailsService.findByEmail(request.getEmail());
+        if (!user.getEmailVerified()) {
+            throw new UnauthorizedException("Account not exist or email not verified");
+        }
         Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authenticate);
         var jwtToken = jwtService.generateTokens(user);

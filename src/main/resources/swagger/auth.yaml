@@ -19,7 +19,7 @@ servers:
   - url: http://api.market.dz/auth/api/v1
 paths:
   /auth/confirm:
-    post:
+    get:
       tags:
         - apiAuth
       operationId: confirm
