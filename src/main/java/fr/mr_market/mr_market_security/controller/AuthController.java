@@ -65,7 +65,7 @@ public class AuthController implements AuthApi {
         AuthenticationResponse authenticationResponse =
                 authenticationService.register(registerMapper(registerRequest), Collections.singletonList(Role.USER), null
                 );
-        String callbackUrl = "http://localhost:8085/auth/api/v1/auth/confirm" + "?" +
+        String callbackUrl = "http://localhost:4200/auth/confirm" + "?" +
                 "token=" +
                 authenticationResponse.getToken().get(TokenType.ACTIVATION_TOKEN.getValue()) +
                 "&" +
