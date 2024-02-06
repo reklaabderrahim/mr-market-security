@@ -26,7 +26,7 @@ spring:
     locations: classpath:db/migration
   kafka:
     producer:
-      bootstrap-servers: localhost:9092,localhost:9093,localhost:9094
+      bootstrap-servers: 192.168.1.218:9092,192.168.1.22:9092,192.168.1.69:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
